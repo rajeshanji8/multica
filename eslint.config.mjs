@@ -12,6 +12,20 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Allow intentionally-unused identifiers when prefixed with `_`
+    // (e.g. required-but-unused Express middleware args like `_req`/`_next`).
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
+  {
     // Backend runs in Node.
     files: ['backend/**/*.{ts,js}'],
     languageOptions: {
