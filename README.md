@@ -56,6 +56,21 @@ npm run dev          # backend on :3000, frontend on :5173, together
 The Vite dev server proxies `/api/*` and `/health` to the backend, so the SPA calls the
 API without CORS. Each app can also run on its own: `npm run dev --workspace backend`.
 
+## End-to-end tests (Playwright)
+
+Browser tests in [`e2e/`](./e2e) drive the real UI against the real API, covering every
+MVP flow (add, toggle, inline edit, delete, filters, empty state, error handling):
+
+```bash
+npm run install:browsers --workspace e2e   # one-time: install the Chromium driver
+npm run test:e2e                            # boots backend + frontend, runs headless
+```
+
+The suite starts both servers itself (backend on an in-memory SQLite DB for a clean,
+deterministic run), so you don't need `npm run dev` or Docker already running. It writes
+an HTML report to `e2e/playwright-report/` and captures a trace/screenshot/video on
+failure. See [`e2e/README.md`](./e2e/README.md) for details.
+
 ## Configuration (environment variables)
 
 | Variable        | Used by  | Default                                      | Description                                                          |
@@ -102,6 +117,9 @@ todo-app/
 │   ├── src/            components, hooks, api client
 │   ├── nginx.conf      static serving + /api & /health proxy
 │   └── Dockerfile      Vite build → nginx static serve
+├── e2e/                Playwright E2E tests (drive real UI vs real API) → @todo-app/e2e
+│   ├── playwright.config.ts  boots backend (:memory: DB) + frontend
+│   └── tests/          CRUD, filters, empty state & error-handling specs
 ├── scripts/
 │   └── smoke-test.mjs  end-to-end create→toggle→delete check
 ├── docker-compose.yml  backend + frontend + persistent SQLite volume
@@ -122,7 +140,7 @@ Browser → REST/JSON over HTTP → Backend API → SQLite (single source of tru
 | `npm run lint`        | Lint the whole repo (ESLint) — `lint:fix` to auto-fix               |
 | `npm run format`      | Format with Prettier — `format:check` to verify only                |
 | `npm run test`        | Run unit/integration tests across workspaces                        |
-| `npm run test:e2e`    | Run the end-to-end (Playwright) suite (added in T6)                 |
+| `npm run test:e2e`    | Run the end-to-end (Playwright) suite — boots servers, headless     |
 | `npm run verify`      | Format check + lint + typecheck + test + build — the green/red gate |
 | `npm run smoke`       | End-to-end smoke test against the running containers                |
 | `npm run docker:up`   | `docker compose up --build -d`                                      |
@@ -142,8 +160,8 @@ Prettier) and typecheck; `pre-push` runs the tests. Bypass in an emergency with
 | **T1** (PUN-7)  | Scaffolding & repo structure              | done     |
 | **T2** (PUN-8)  | Backend REST API (Express + SQLite + Zod) | done     |
 | **T3** (PUN-9)  | Frontend UI (React)                       | done     |
-| **T4** (PUN-10) | Integration, Docker packaging & docs      | _this_   |
+| **T4** (PUN-10) | Integration, Docker packaging & docs      | done     |
 | **T5** (PUN-11) | Test automation scripts & git hooks       | done     |
-| **T6** (PUN-12) | End-to-end tests (Playwright)             | upcoming |
+| **T6** (PUN-12) | End-to-end tests (Playwright)             | done     |
 | **T7** (PUN-13) | CI pipeline (GitHub Actions)              | upcoming |
 | **T8** (PUN-14) | Deployment automation (CD)                | upcoming |
