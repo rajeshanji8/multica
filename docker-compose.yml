@@ -1,0 +1,50 @@
+# Bring up the full todo app: backend API + frontend (nginx) + persistent
+# SQLite volume.  Usage:
+#
+#   docker compose up --build      # build images and start
+#   open http://localhost:8080
+#
+# Data survives `docker compose down` / restarts via the named `todo-data`
+# volume.  Use `docker compose down -v` to wipe it.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      PORT: 3000
+      DB_PATH: /data/todos.db
+      # The browser talks to the backend through the frontend's nginx proxy
+      # (same origin), so CORS is effectively unused in this setup. Kept
+      # configurable for anyone exposing the API directly.
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+    volumes:
+      - todo-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - '${FRONTEND_PORT:-8080}:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  todo-data:

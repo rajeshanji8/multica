@@ -39,6 +39,13 @@ export default tseslint.config(
       globals: { ...globals.browser },
     },
   },
+  {
+    // Standalone tooling scripts run in Node.
+    files: ['scripts/**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
   // Keep ESLint out of Prettier's way (must be last).
   prettier,
 );
