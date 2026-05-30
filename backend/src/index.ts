@@ -1,19 +1,23 @@
-import express, { type Request, type Response } from 'express';
+import { createApp } from './app.js';
+import { loadConfig } from './config.js';
+import { createDatabase } from './db.js';
 
-const app = express();
-const PORT = Number(process.env.PORT ?? 3000);
+const config = loadConfig();
+const db = createDatabase(config.dbPath);
+const app = createApp({ db, corsOrigin: config.corsOrigin });
 
-app.use(express.json());
-
-// Placeholder health check — the real Todo REST API lands in T2 (PUN-8).
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', service: 'todo-app-backend' });
+const server = app.listen(config.port, () => {
+  console.log(`[backend] listening on http://localhost:${config.port}`);
 });
 
-app.get('/', (_req: Request, res: Response) => {
-  res.json({ message: 'Todo API placeholder. See T2 (PUN-8) for the real endpoints.' });
-});
+// Close the DB cleanly on shutdown so WAL data is flushed.
+function shutdown(signal: string): void {
+  console.log(`[backend] received ${signal}, shutting down`);
+  server.close(() => {
+    db.close();
+    process.exit(0);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`[backend] listening on http://localhost:${PORT}`);
-});
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
