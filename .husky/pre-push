@@ -1,0 +1,2 @@
+# Run the unit/integration test suite before pushing.
+npm run test
