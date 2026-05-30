@@ -1,0 +1,29 @@
+# Keep the Docker build context small and reproducible.
+**/node_modules
+**/dist
+**/build
+**/*.tsbuildinfo
+
+# Local data / databases — never bake these into an image.
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/*.sqlite
+**/*.sqlite3
+data/
+
+# VCS, CI, editor, docs
+.git
+.github
+.husky
+.vscode
+.idea
+**/*.log
+coverage
+playwright-report
+test-results
+
+# Env files
+.env
+.env.*
+!.env.example
