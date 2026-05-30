@@ -52,15 +52,35 @@ can call the API without CORS configuration.
 | `npm run lint:fix`     | Lint and auto-fix                                                   |
 | `npm run format`       | Format the repo with Prettier                                       |
 | `npm run format:check` | Check formatting without writing                                    |
-| `npm run verify`       | Format check + lint + typecheck + build (the single green/red gate) |
+| `npm run test`         | Run unit/integration tests across workspaces                        |
+| `npm run test:e2e`     | Run the end-to-end (Playwright) suite                               |
+| `npm run verify`       | Format check + lint + typecheck + test + build — the green/red gate |
 
 You can also target a single workspace, e.g. `npm run dev --workspace backend`.
+
+`test` and `test:e2e` delegate to each workspace with `--workspaces --if-present`,
+so they pass quietly until the test suites land (T2/T3 add unit/integration tests;
+T6 adds the Playwright `test:e2e` script). Any failing workspace makes the script
+exit non-zero, so `npm run verify`, the git hooks, and CI all turn red on a bad change.
+
+## Git hooks
+
+Hooks are managed by [husky](https://typicode.github.io/husky/) and install
+automatically on `npm install` (via the `prepare` script). No manual setup needed.
+
+| Hook         | Runs                                                                  |
+| ------------ | --------------------------------------------------------------------- |
+| `pre-commit` | `lint-staged` (ESLint `--fix` + Prettier on staged files) + typecheck |
+| `pre-push`   | `npm run test`                                                        |
+
+To bypass in an emergency, use `git commit --no-verify` / `git push --no-verify`.
 
 ## Tooling
 
 - **Language:** TypeScript 5 (shared base config in `tsconfig.base.json`).
 - **Lint/format:** ESLint 9 (flat config) + Prettier, shared across packages.
 - **Dev orchestration:** `concurrently` runs both apps from one command.
+- **Quality gates:** husky + lint-staged guard commits/pushes; `npm run verify` is the one-shot check.
 
 ## Roadmap
 
