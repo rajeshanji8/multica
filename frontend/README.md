@@ -15,8 +15,8 @@ Built in **T3 (PUN-9)** against the **T2 (PUN-8)** REST API contract.
 
 ## Configuration
 
-| Env var        | Default | Description                                                              |
-| -------------- | ------- | ------------------------------------------------------------------------ |
+| Env var        | Default   | Description                                                            |
+| -------------- | --------- | ---------------------------------------------------------------------- |
 | `VITE_API_URL` | _(empty)_ | Base URL of the backend API. Leave empty to use relative `/api` paths. |
 
 During development `/api/*` and `/health` are proxied to the backend on
